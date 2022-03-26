@@ -85,7 +85,7 @@ function hapus($id) {
     return mysqli_affected_rows($conn);
 }
 
-// function edit
+// function ubah
 function ubah($data) {
 
     global $conn;

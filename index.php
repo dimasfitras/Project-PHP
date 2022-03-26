@@ -2,173 +2,119 @@
 
 session_start();
 
-if(!isset($_SESSION["login"])) {
-    header("Location: login.php");
-    exit;
-}
-
 require 'functions.php';
 
-// Menambahkan pagination & konfigurasi pagination
-$dataPerHalaman = 10;
-$jumlahData = count( query("SELECT * FROM datamahasiswa") );
-$halaman = ceil($jumlahData / $dataPerHalaman);
-if( isset($_GET["halaman"]) ) {
-    $halamanAktif = $_GET["halaman"];
-} else {
-    $halamanAktif = 1;
+// cek cookie
+if( isset($_COOKIE["lock"]) && isset($_COOKIE["key"]) ) {
+    $lock = $_COOKIE['lock'];
+    $key = $_COOKIE['key'];
+
+    // ambil username berdasarkan id
+    $hasil = mysqli_query($conn, "SELECT username FROM user WHERE id=$id");
+    $row = mysqli_fetch_assoc($hasil);
+
+    // cek cookie dan username 
+    if($key === hash('sha100', $row['username'])) {
+        $_SESSION['login'] = true;
+    }
 }
 
-$awalData = ($dataPerHalaman * $halamanAktif) - $dataPerHalaman;
 
-$jumlahLink = 1;
-if( $halamanAktif > $jumlahLink ) {
-    $startNum = $halamanAktif - $jumlahLink;
-} else {
-    $startNum = 1;
+
+
+if(isset($_POST["login"])) {
+
+$username = $_POST["username"];
+$password = $_POST["password"];
+
+$hasil = mysqli_query( $conn, "SELECT * FROM user WHERE username='$username' " );
+
+// cek username
+if( mysqli_num_rows($hasil) === 1 ) {
+
+    // cek password
+    $row = mysqli_fetch_assoc($hasil);
+    if(password_verify($password, $row["password"])) {
+
+        // set session
+        $_SESSION["login"] = true;
+
+        // cek remember me
+        if( isset($_POST["remember"]) ) {
+            // buat cookie
+            setcookie('lock', $row['id'], time() + 40);
+            setcookie('key', hash('sha100', $row['username']), time() + 40);
+        }
+
+        header("Location: index2.php");
+        exit;
+    }
 }
-
-if( $halamanAktif < ($halaman - $jumlahLink) ) {
-    $endNum = $halamanAktif + $jumlahLink;
-} else {
-    $endNum = $halaman;
-}
-// End pagination
-
-$mahasiswa = query("SELECT * FROM datamahasiswa LIMIT $awalData, $dataPerHalaman");
-
-// Ketika tombol cari di klik maka akan menampilkan hasil data yang dicari
-if ( isset($_POST["cari"]) ) {   
-    $mahasiswa = cari( $_POST["keyword"] );
+$error = true;
 }
 
 ?>
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <title>Halaman Administrator</title>
-    <style>
-        .nav-teks{
-            letter-spacing: 5px;
-            color: green;
-            font-weight: bold;
-            padding: 10px;
-        }
+<html>
+    <head>
+        <script type="text/javascript" src="aset/bootstrap/js/jquery.js"></script>
+        <script type="text/javascript" src="aset/bootstrap/js/bootstrap.min.js"></script>
+        <link rel="stylesheet" href="aset/bootstrap/css/bootstrap.min.css">
+        <link rel="stylesheet" href="aset/font-awesome/css/font-awesome.min.css">
+        <title>Login Database</title>
+    </head>
+    <body>
 
-        .teks{
-            font-size: 18px;
-            text-align: center;
-            font-family: cambria;
-        }
-    </style>
-
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-</head>
-
-<body>
-
-    <nav class="navbar navbar-expand-sm bg-dark navbar-dark">
-        <div class="container" style="margin-left:105px;">
-            <a class="navbar-brand" href="index.php">
-                <img class="rounded-pill" alt="Logo" style="width:40px;" src="img/unbara.png" style="font-family: cambria;"> BATURAJA UNIVERSITY
-                <span class="nav-teks"></span>
-            </a>
+        <div align="center">
+            <br>
+            <div align="center" style="width:320px;margin-top:5%;">
+                <form name="login_form" method="post" class="well well-lg" action="" style="-webkit-box-shadow: 0px 0px 20px #888888;">
+                    <i class="fa fa-book fa-4x"></i>
+                    <h4>DATABASE MAHASISWA</h4>
+                    <br>
+                    <?php if(isset($error)) : ?>
+        <div class="alert alert-danger">
+            <strong>Log In Gagal!</strong> Username atau Password Salah.
         </div>
-        <!-- Log out -->
-        <div style="margin-right:120px;">
-            <a href="logout.php" class="button">
-                <button class="btn btn-danger" style="font-family: cambria;">Keluar </button>
+    <?php endif; ?>
+                    <div class="input-group">
+                        <span class="input-group-addon"><i class="fa fa-user" aria-hidden="true"></i></span>
+                        <input require name="username" id="username" class="form-control" type="text" placeholder="username" autocomplete="off" />
+                    </div>
+                    <br/>
+                    <div class="input-group">
+                        <span class="input-group-addon"><i class="fa fa-lock" aria-hidden="true"></i></span>
+                        <input require name="password" id="password" class="form-control" type="password" placeholder="password" autocomplete="off" />
+                    </div>
+                    <br />
+
+            <div class="mb-1 mt-1">
+            <button class="btn btn-primary" type="submit" name="login">Login</button>
+            <a href="registrasi.php">
+                <button type="button" class="btn btn-success">Buat Akun Baru</button>
             </a>
+            </div>
+                </form>
+            </div>
         </div>
-    </nav>
+        <br>
 
-    <!-- Heading -->
-    <hr>
-    <h1 class="container">Data Mahasiswa</h1>
-    <hr>
+        <footer align="center">
+            Created By <a href="#" title="Universitas Baturaja"><i class="fa fa-copyright" aria-hidden="true">Universitas Baturaja</i></a>
+        </footer>
+    </body>
 
-    <!-- Fitur cari -->
-    <div class="container">
-        <form class="d-flex" action="" method="post">
-            <input class="form-control me-1 input-sm" style="width: 300px;" type="text" name="keyword" placeholder="Masukkan keyword.." autocomplete="off">
-            <button class="btn btn-info" type="submit" name="cari"><i class="fa fa-search"></i></button>
-        </form>
-    </div>
+    <!--<script type="text/javascript">
+    function validasi() {
+        var username = document.getElementById("username").value;
+        var password = document.getElementById("password").value;       
+        if (username != "" && password!="") {
+            return true;
+        }else{
+            alert('Username dan Password harus di isi !');
+            return false;
+        }
+    }
+    </script>-->
 
-    <!-- Tombol -->
-    <div class="container mt-3">
-        <!-- Tambah -->
-        <a href="tambah.php">
-            <button class="btn btn-success btn-sm">
-                Tambah Mahasiswa  
-                <i class="fa fa-plus"></i>
-            </button>
-        </a>
-    </div>
-
-    <!-- Tabel -->
-    <div class="container mt-2">           
-        <table class="table table-bordered">
-            <thead>
-                <tr>
-                    <th class="teks">No.</th>
-                    <th class="teks">Foto</th>
-                    <th class="teks">Nama Mahasiswa</th>
-                    <th class="teks">NPM</th>
-                    <th class="teks">Jurusan</th>
-                    <th class="teks">E-mail</th>
-                    <th class="teks" colspan="2">Aksi</th>
-                </tr>
-            </thead>
-
-            <?php $a = $awalData + 1; ?>
-            <?php foreach( $mahasiswa as $mhs ) : ?>
-                <tbody>
-                    <tr>
-                        <td class="teks"><?= $a; ?></td>
-                        <td class="teks"><img src="img/<?= $mhs["foto"]; ?>" class="img-thumbnail" alt="Cinque Terre" width="80"></td>
-                        <td class="teks"><?= $mhs["nama"]; ?></td>
-                        <td class="teks"><?= $mhs["npm"]; ?></td>
-                        <td class="teks"><?= $mhs["jurusan"]; ?></td>
-                        <td class="teks"><?= $mhs["email"]; ?></td>
-                        <td class="teks">
-                            <a href="ubah.php?id=<?= $mhs["id"]; ?>"><i class="fa fa-edit fa-lg" style="color: #009933;"></i></a>
-                        </td>
-                        <td class="teks">
-                            <a href="hapus.php?id=<?= $mhs["id"]; ?>" onclick="return confirm('Apakah Anda Yakin?');"><i class="fa fa-trash-o fa-lg" style="color: #cc0000;"></i></a>
-                        </td>
-                    </tr>
-                </tbody>
-            <?php $a++; ?>
-            <?php endforeach; ?>
-        </table>
-    </div>
-
-    <!-- navigasi -->
-    <div class="container mt-3">
-        <ul class="pagination justify-content-center pagination-sm">
-            <?php if ($halamanAktif > 1) : ?>
-                <li class="page-item"><a class="page-link" href="?halaman=<?= $halamanAktif - 1; ?>">Previous</a></li>
-            <?php endif; ?>
-
-            <?php for ($i = $startNum; $i <= $endNum; $i++) : ?>
-                <?php if ($i == $halamanAktif) : ?>
-                    <li class="page-item"><a class="page-link" href="?halaman=<?= $i; ?>" style="color:white; background-color:red; font-weight:bold;"><?= $i; ?></a></li>
-                <?php else : ?>
-                    <li class="page-item"><a class="page-link" href="?halaman=<?= $i; ?>"><?= $i; ?></a></li>
-                <?php endif; ?>
-            <?php endfor;  ?>
-
-            <?php if ($halamanAktif < $halaman) : ?>
-                <li class="page-item"><a class="page-link" href="?halaman=<?= $halamanAktif + 1; ?>">Next</a></li>
-            <?php endif; ?>
-        </ul>
-    </div>
-
-</body>
-</html>>
+</html>

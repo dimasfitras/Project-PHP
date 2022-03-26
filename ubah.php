@@ -3,7 +3,7 @@
 session_start();
 
 if(!isset($_SESSION["login"])) {
-    header("Location: login.php");
+    header("Location: index.php");
     exit;
 }
 
@@ -16,9 +16,9 @@ $mahasiswa2 = query("SELECT * FROM datamahasiswa WHERE id=$id")[0];
 if(isset($_POST["edit"])) {
 
     if(ubah($_POST) > 0) {
-        echo "<script>alert('Data Berhasil Diubah'); document.location.href='index.php';</script>";
+        echo "<script>alert('Data Berhasil Diubah'); document.location.href='index2.php';</script>";
     } else {
-        echo "<script>alert('Data Gagal Diubah!'); document.location.href='index.php';</script>";
+        echo "<script>alert('Data Gagal Diubah!'); document.location.href='index2.php';</script>";
     }
 }
 
@@ -55,7 +55,7 @@ if(isset($_POST["edit"])) {
 
     <!-- Heading -->
     <hr>
-    <h2 class="teks">Ubah Data Mahasiswa</h2>
+    <h2>Ubah Data Mahasiswa</h2>
     <hr>
 
     <!-- Form tambah data -->
@@ -85,12 +85,12 @@ if(isset($_POST["edit"])) {
         </div>
         <div class="mb-3 mt-3">
             <button class="btn btn-success" type="submit" name="edit">Ubah <span class="glyphicon glyphicon-ok"></span></button>
-            <a href="index.php">
+            <a href="index2.php">
                 <button class="btn btn-danger" type="button">Batal <span class="glyphicon glyphicon-remove"></span></button>
             </a>
         </div>
   </form>
-
+  <?php include 'footer.php'; ?>
 </div>
 
 </body>

@@ -3,7 +3,7 @@
 session_start();
 
 if(!isset($_SESSION["login"])) {
-    header("Location: login.php");
+    header("Location: index2.php");
     exit;
 }
 
@@ -14,9 +14,9 @@ if(isset($_POST["tambah"])) {
 
     // cek apakah data berhasil ditambahkan atau tidak
     if(tambah($_POST) > 0) {
-        echo "<script>alert('Data Berhasil Ditambahkan'); document.location.href='index.php';</script>";
+        echo "<script>alert('Data Berhasil Ditambahkan'); document.location.href='index2.php';</script>";
     } else {
-        echo "<script>alert('Data Gagal Ditambahkan!'); document.location.href='index.php';</script>";
+        echo "<script>alert('Data Gagal Ditambahkan!'); document.location.href='index2.php';</script>";
     }
 }
 
@@ -53,7 +53,7 @@ if(isset($_POST["tambah"])) {
 
     <!-- Heading -->
     <hr>
-    <h2 class="teks">Tambah Data Mahasiswa</h2>
+    <h2>Tambah Data Mahasiswa</h2>
     <hr>
 
     <!-- Form tambah data -->
@@ -80,12 +80,12 @@ if(isset($_POST["tambah"])) {
         </div>
         <div class="mb-3 mt-3">
             <button class="btn btn-success" type="submit" name="tambah">Selesai <span class="glyphicon glyphicon-ok"></span></button>
-            <a href="index.php">
+            <a href="index2.php">
                 <button class="btn btn-danger" type="button">Batal <span class="glyphicon glyphicon-remove"></span></button>
             </a>
         </div>
   </form>
-
+  <?php include 'footer.php'; ?>
 </div>
 
 </body>

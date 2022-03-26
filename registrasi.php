@@ -40,11 +40,11 @@ if(isset($_POST["registrasi"])) {
 
 <body>
 
-<div class="container mt-3">
+<div class="container mt-0">
 
     <!-- Heading -->
     <hr>
-    <h2 class="teks">Registrasi</h2>
+    <h2>Registrasi</h2>
     <hr>
 
     <!-- Form registrasi -->
@@ -63,12 +63,14 @@ if(isset($_POST["registrasi"])) {
         </div>
         <div class="mb-3 mt-3">
             <button class="btn btn-success" type="submit" name="registrasi">Registrasi</button>
-            <a href="login.php">
+            <a href="index.php">
             <button class="btn btn-primary" type="button">Kembali Log In</button>
             </a>
         </div>
-  </form>
 
+        
+  </form>
+  <?php include 'footer.php'; ?>
 </div>
 
 </body>
